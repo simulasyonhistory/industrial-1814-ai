@@ -670,7 +670,7 @@ async function processAI() {
   render();
 
   try {
-    const resp = await fetch('/api/decision', {
+    const resp = await fetch('/ai-decision', {
       method:'POST',
       headers:{'Content-Type':'application/json'},
       body: JSON.stringify({
@@ -691,6 +691,7 @@ async function processAI() {
     });
 
     const data = await resp.json();
+    
     state.log = state.log.filter(item => item.status !== "Bekleniyor");
 
     if (!resp.ok || !data.ok) {
@@ -716,6 +717,30 @@ async function processAI() {
       render();
       return;
     }
+    // ✅ BAŞARILI AI SONUCU
+const r = data.result;
+
+state.production += Number(r.production || 0);
+state.logistics += Number(r.logistics || 0);
+state.morale += Number(r.morale || 0);
+state.risk += Number(r.risk || 0);
+
+// sınırla
+state.production = Math.max(0, Math.min(1000, state.production));
+state.logistics = Math.max(0, Math.min(1000, state.logistics));
+state.morale = Math.max(0, Math.min(100, state.morale));
+state.risk = Math.max(0, Math.min(100, state.risk));
+
+// log ekle
+state.log.unshift({
+  title: "Serbest Karar Uygulandı",
+  body: r.summary || "AI kararı uygulandı.",
+  tag: "good",
+  status: "OpenAI yorumu"
+});
+
+render();
+return;
 
     const effects = data.effects || {};
     Object.keys(effects).forEach(k => {
