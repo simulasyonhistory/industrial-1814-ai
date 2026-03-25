@@ -1,0 +1,765 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Industrial Operator: 1814</title>
+  <style>
+    :root{
+      --bg:#07111f;
+      --panel:#12233d;
+      --panel2:#182d4d;
+      --line:#2c456d;
+      --text:#eef4ff;
+      --muted:#bfd0ee;
+      --good:#8ef0a7;
+      --warn:#ffd37a;
+      --bad:#ff8a8a;
+      --accent:#d8e8ff;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      background:linear-gradient(180deg,#07111f 0%,#0c1b31 100%);
+      color:var(--text);
+      font-family:Arial, Helvetica, sans-serif;
+    }
+    .wrap{max-width:1200px;margin:0 auto;padding:20px}
+    .hero,.panel{background:rgba(18,35,61,.96);border:1px solid var(--line);border-radius:18px;box-shadow:0 14px 40px rgba(0,0,0,.25)}
+    .hero{padding:22px;margin-bottom:16px}
+    .hero h1{margin:0 0 8px;font-size:34px}
+    .hero p{margin:8px 0;color:var(--muted);line-height:1.55}
+    .grid{display:grid;grid-template-columns:1.15fr .85fr;gap:16px}
+    .panel{padding:18px}
+    .panel h2,.panel h3{margin-top:0}
+    .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:14px}
+    .stat{background:var(--panel2);border:1px solid var(--line);padding:12px;border-radius:14px}
+    .stat .label{font-size:13px;color:var(--muted)}
+    .stat .value{font-size:26px;font-weight:bold;margin-top:6px}
+    .smallGrid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:10px}
+    .barWrap{margin-top:8px;height:10px;background:#0b1730;border-radius:999px;overflow:hidden;border:1px solid var(--line)}
+    .bar{height:100%;background:#d8e8ff;width:50%}
+    .story{line-height:1.7;color:var(--text);font-size:16px}
+    .muted{color:var(--muted)}
+    .choices{display:grid;gap:12px;margin-top:16px}
+    .choice{background:var(--panel2);border:1px solid var(--line);border-radius:16px;padding:14px}
+    .choice h4{margin:0 0 8px;font-size:18px}
+    .choice p{margin:6px 0;color:var(--muted);line-height:1.5}
+    .effects{font-size:14px;color:#dce9ff;margin:8px 0 0}
+    button{
+      appearance:none;border:none;border-radius:12px;padding:11px 14px;
+      background:#eef4ff;color:#07111f;font-weight:bold;cursor:pointer;font-size:15px
+    }
+    button:hover{opacity:.93}
+    .secondary{background:#213a61;color:var(--text);border:1px solid var(--line)}
+    .log{max-height:500px;overflow:auto;padding-right:4px}
+    .logEntry{background:var(--panel2);border:1px solid var(--line);border-radius:14px;padding:12px;margin-bottom:10px}
+    .logEntry h4{margin:0 0 6px;font-size:16px}
+    .tag{display:inline-block;padding:4px 8px;border-radius:999px;font-size:12px;font-weight:bold;margin-left:8px}
+    .good{color:var(--good)} .warn{color:var(--warn)} .bad{color:var(--bad)}
+    .tag.good{background:rgba(142,240,167,.12);color:var(--good)}
+    .tag.warn{background:rgba(255,211,122,.12);color:var(--warn)}
+    .tag.bad{background:rgba(255,138,138,.12);color:var(--bad)}
+    .topActions{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+    .footerNote{margin-top:10px;font-size:13px;color:var(--muted);line-height:1.5}
+    .ending{font-size:18px;line-height:1.6}
+    .mono{font-family:Consolas, monospace}
+    @media (max-width: 920px){
+      .grid{grid-template-columns:1fr}
+      .stats{grid-template-columns:1fr 1fr}
+    }
+    @media (max-width: 640px){
+      .stats,.smallGrid{grid-template-columns:1fr}
+      .hero h1{font-size:28px}
+    }
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <div class="hero">
+    <h1>Industrial Operator: 1814</h1>
+    <p><strong>Newcastle upon Tyne, 25 Temmuz 1814.</strong> Napolyon Savaşları'nın sonuna yaklaşılırken Britanya sanayisi kömüre aç. Sen, <strong>Grand Allies</strong> maden konsorsiyumunun tam yetkili operasyonel direktörü ve baş yatırımcısısın.</p>
+    <p>Madenler günde 500 ton kömür çıkarıyor ama nehre ulaşan miktar sadece 180 ton. Atlı lojistik çökmüş durumda, Newcomen pompaları kömürün büyük kısmını kendi içinde yakıyor, işçiler huzursuz, raylar kırılgan, liman darboğazlı.</p>
+    <p>Aylık mali tablo başlangıçta zararda: <strong>Gelir 2.160 £</strong>, <strong>Gider 2.320 £</strong>, <strong>Net -160 £</strong>. Bu sistemi ya kurtaracaksın ya da çökmeye bırakacaksın.</p>
+    <div class="topActions">
+      <button onclick="restartGame()">Oyunu Baştan Başlat</button>
+      <button class="secondary" onclick="showHelp()">Nasıl Oynanır?</button>
+    </div>
+  </div>
+
+  <div class="grid">
+    <div>
+      <div class="panel">
+        <h2>Durum Paneli</h2>
+        <div class="stats">
+          <div class="stat"><div class="label">Ay</div><div class="value" id="monthLabel">Temmuz 1814</div></div>
+          <div class="stat"><div class="label">Aşama</div><div class="value" id="stageLabel">1 / 6</div></div>
+          <div class="stat"><div class="label">Nakit</div><div class="value">£<span id="cashVal">15000</span></div></div>
+        </div>
+        <div class="smallGrid">
+          <div class="stat">
+            <div class="label">Üretim</div>
+            <div class="value"><span id="productionVal">500</span> ton</div>
+            <div class="barWrap"><div class="bar" id="productionBar"></div></div>
+          </div>
+          <div class="stat">
+            <div class="label">Lojistik Kapasitesi</div>
+            <div class="value"><span id="logisticsVal">180</span> ton</div>
+            <div class="barWrap"><div class="bar" id="logisticsBar"></div></div>
+          </div>
+          <div class="stat">
+            <div class="label">Pompa Verimi</div>
+            <div class="value"><span id="pumpVal">20</span>/100</div>
+            <div class="barWrap"><div class="bar" id="pumpBar"></div></div>
+          </div>
+          <div class="stat">
+            <div class="label">Ray / Altyapı</div>
+            <div class="value"><span id="railVal">25</span>/100</div>
+            <div class="barWrap"><div class="bar" id="railBar"></div></div>
+          </div>
+          <div class="stat">
+            <div class="label">İşçi Morali</div>
+            <div class="value"><span id="moraleVal">48</span>/100</div>
+            <div class="barWrap"><div class="bar" id="moraleBar"></div></div>
+          </div>
+          <div class="stat">
+            <div class="label">Risk</div>
+            <div class="value"><span id="riskVal">28</span>/100</div>
+            <div class="barWrap"><div class="bar" id="riskBar"></div></div>
+          </div>
+        </div>
+        <div class="footerNote">
+          <strong>Mantık:</strong> Oyuncu farklı bir yol seçebilir. Oyun dallanan roman gibi değil, değişkenlerle çalışır. Aynı dünya sabit kalır; senin seçimin sistemin sonucunu değiştirir.
+        </div>
+      </div>
+
+      <div class="panel" style="margin-top:16px;">
+        <h2 id="sceneTitle">Sahne Başlığı</h2>
+        <div class="story" id="sceneText"></div>
+        
+        <div class="choices" id="choicesBox"></div>
+        <div class="choice" style="margin-top:16px;">
+          <h3 style="margin:0 0 10px;">Serbest karar modu</h3>
+          <p class="muted" style="margin:0 0 10px;">Şık seçmek zorunda değilsin. Kendi planını yaz; oyun bunu 1814 koşullarına göre yorumlayıp sisteme uygular.</p>
+          <textarea id="aiInput" placeholder="Örn: Önce Watt pompalarını sipariş ederim, sonra ray altyapısını güçlendirir ve işçilere ek erzak veririm." style="width:100%;min-height:110px;background:#0d1a31;color:#eef4ff;border:1px solid var(--line);border-radius:14px;padding:12px;font:inherit;resize:vertical;"></textarea>
+          <div class="topActions" style="margin-top:12px;">
+            <button onclick="processAI()">Serbest kararı uygula</button>
+            <button class="secondary" onclick="fillExample()">Örnek karar doldur</button>
+          </div>
+          <div class="footerNote">Not: Oyun dönem dışı kararları kabul etmez. Örneğin modern motorlar, elektrikli pompalar veya 20. yüzyıl teknolojileri geçersiz sayılır.</div>
+        </div>
+
+      </div>
+    </div>
+
+    <div>
+      <div class="panel">
+        <h2>Operasyon Günlüğü</h2>
+        <div class="log" id="logBox"></div>
+      </div>
+
+      <div class="panel" style="margin-top:16px;">
+        <h2>Durum Özeti</h2>
+        <div id="summaryBox" class="story muted"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const monthNames = ["Temmuz 1814","Ağustos 1814","Eylül 1814","Ekim 1814","Kasım 1814","Aralık 1814"];
+
+const initialState = () => ({
+  stage: 0,
+  cash: 15000,
+  production: 500,
+  logistics: 180,
+  pump: 20,
+  rail: 25,
+  morale: 48,
+  risk: 28,
+  income: 2160,
+  expenses: 2320,
+  ended: false,
+  endingText: "",
+  log: [
+    {title:"Başlangıç Raporu", body:"Sistem zararda. Günde 500 ton kömür çıkarılıyor ama nehre sadece 180 ton ulaşıyor. Atlı lojistik yetersiz, pompalar verimsiz, işçiler huzursuz.", tag:"warn", status:"Krize giriş"}
+  ]
+});
+
+let state = initialState();
+
+const scenes = [
+  {
+    title: "Bölüm 1 — Çöküşün Eşiği",
+    text: `
+      <p>8 millik hat boyunca kömürünüz maden ağzından Tyne kıyısına inemiyor. Atlar ağır yükle dik eğimde zorlanıyor, raylar çatlıyor, stok maden ağzında bekledikçe kalite düşüyor.</p>
+      <p><strong>İlk karar:</strong> Lojistik felaketini nasıl ele alacaksınız?</p>
+    `,
+    choices: [
+      {
+        title: "İki aşamalı transfer hattı kur",
+        desc: "Yamaçta küçük vagon, düzlükte aktarma istasyonu ve büyük yük mantığı. Pahalı ama sistemli çözüm.",
+        effects: { cash:-870, logistics:+70, rail:+8, risk:+3, morale:-1, expenses:+80 },
+        result:"Aktarma istasyonu kuruluyor. Yamaçtaki kinetik risk yönetilebilir hale geliyor. Lojistik kapasitesi yükseliyor ama inşaat baskısı kısa vadede maliyet yaratıyor.",
+        tag:"good"
+      },
+      {
+        title: "Sadece at sayısını artır",
+        desc: "Hızlı ve tanıdık çözüm. Sistemi değiştirmez, sadece mevcut sorunu zorlayarak taşır.",
+        effects: { cash:-300, logistics:+30, risk:+8, morale:+2, expenses:+120 },
+        result:"Daha fazla at kiralandı. Kısa vadede sevkiyat arttı fakat yem maliyeti ve yol yıpranması büyüdü.",
+        tag:"warn"
+      },
+      {
+        title: "Lokomotifi erkenden hatta çıkar",
+        desc: "Stephenson’ın makinesini erkenden dene. Büyük sıçrama ihtimali var ama raylar hazır değil.",
+        effects: { cash:-1500, logistics:+60, rail:-12, risk:+18, morale:-4 },
+        result:"Lokomotif denemesi sistemi zorladı. Bazı noktalarda ray hasarı görüldü. Hız potansiyeli var ama altyapı bunu kaldırmıyor.",
+        tag:"bad"
+      }
+    ]
+  },
+  {
+    title: "Bölüm 2 — Değişmez Zemin",
+    text: `
+      <p>Hat boyunca dökme demir rayların altında zemin oynuyor. Yağmur suyu toprağı çamura çeviriyor, yük altında lateral kayma başlıyor.</p>
+      <p><strong>Karar:</strong> Altyapıyı nasıl güçlendireceksiniz?</p>
+    `,
+    choices: [
+      {
+        title: "Katmanlı balast sistemi uygula",
+        desc: "Kilit taşı + ince taş + çakıl. Uzun vadeli sağlamlık sağlar.",
+        effects: { cash:-1850, rail:+35, logistics:+25, risk:-8, expenses:-120 },
+        result:"Balast standardı devreye girdi. Ray kırılması azaldı, drenaj iyileşti, yük daha kararlı taşınmaya başladı.",
+        tag:"good"
+      },
+      {
+        title: "Sadece kritik düzlük bölgeyi güçlendir",
+        desc: "Daha ucuz, daha hedefli çözüm. Tam koruma sağlamaz.",
+        effects: { cash:-900, rail:+18, logistics:+12, risk:-3, expenses:-50 },
+        result:"Lokomotifin işleyeceği bölge daha stabil hale geldi fakat hattın zayıf kenarları hâlâ bakım istiyor.",
+        tag:"warn"
+      },
+      {
+        title: "Yatırımı ertele, onarımla devam et",
+        desc: "Parayı korur ama temel sorunu çözmez.",
+        effects: { cash:0, rail:-6, logistics:-10, risk:+10, morale:-2, expenses:+60 },
+        result:"Yama işi devam ediyor. Nakit korundu fakat hat davranışı kötüleşti, kırılma ve kayma riski arttı.",
+        tag:"bad"
+      }
+    ]
+  },
+  {
+    title: "Bölüm 3 — Stephenson’ın Riski",
+    text: `
+      <p>Stephenson, lokomotif üzerinde daha yüksek basınç ve daha iyi çekiş denemek istiyor. Ancak 1814 metalürjisi sınırda. Patlama veya raydan çıkma tüm güveni sarsabilir.</p>
+      <p><strong>Karar:</strong> Test yaklaşımınız ne olacak?</p>
+    `,
+    choices: [
+      {
+        title: "İzole deneme hattı kur, kademeli test yap",
+        desc: "En güvenli yöntem. Yavaş ama veri üretir.",
+        effects: { cash:-240, rail:+10, risk:-6, morale:+4 },
+        result:"Saha deney atölyesi ve küçük ring kuruldu. Veri toplandı, altyapı-araç uyumu anlaşıldı. Çalışanlar patlama korkusunu daha az hissediyor.",
+        tag:"good"
+      },
+      {
+        title: "Ana hatta kısıtlı test yap",
+        desc: "Hızlı sonuç alırsın ama operasyonu rahatsız eder.",
+        effects: { cash:-140, logistics:+10, rail:-5, risk:+8, morale:-1 },
+        result:"Lokomotif sahaya çıktı. Bazı hız kazanımları görüldü ama hat üzerindeki baskı ve personel kaygısı arttı.",
+        tag:"warn"
+      },
+      {
+        title: "Yüksek basınçla tam risk al",
+        desc: "Maksimum sıçrama, maksimum tehlike.",
+        effects: { cash:-180, logistics:+20, rail:-10, risk:+18, morale:-6 },
+        result:"Makine performansı yükseldi fakat bütün sistem kırılma sınırına dayandı. En küçük hata büyük kazaya dönebilir.",
+        tag:"bad"
+      }
+    ]
+  },
+  {
+    title: "Bölüm 4 — Pompa Krizi",
+    text: `
+      <p>Newcomen makineleri çıkardığınız kömürün büyük kısmını kendi üstünde yakıyor. Su seviyesi yükseliyor. Derin galeriler tehlikede. Bu artık teknik lüks değil, varoluş meselesi.</p>
+      <p><strong>Karar:</strong> Enerji sistemini nasıl ele alacaksınız?</p>
+    `,
+    choices: [
+      {
+        title: "İki adet Watt tipi pompa sipariş et",
+        desc: "Büyük yatırım ama oyunun omurgasını değiştirir.",
+        effects: { cash:-4500, pump:+45, production:+120, risk:+6, morale:-3, expenses:-350, income:+380 },
+        result:"Watt pompaları sipariş edildi. Yakıt kaybı sert biçimde düştü, derin galeriler yeniden üretime açılıyor. Kurulum baskısı var ama sistemin geleceği değişti.",
+        tag:"good"
+      },
+      {
+        title: "Tek pompa al, ihtiyatlı ilerle",
+        desc: "Daha güvenli nakit yönetimi, daha yavaş dönüşüm.",
+        effects: { cash:-2300, pump:+22, production:+60, risk:+4, morale:-1, expenses:-170, income:+160 },
+        result:"Tek yeni pompa sisteme giriyor. Kayıplar azalıyor ama tam dönüşüm için ikinci aşama gerekecek.",
+        tag:"warn"
+      },
+      {
+        title: "Mevcut Newcomen sistemiyle devam et",
+        desc: "Yatırım yok ama sistem kendi kendini tüketmeye devam eder.",
+        effects: { cash:0, pump:-6, production:-40, risk:+14, morale:-5, expenses:+90 },
+        result:"Su baskısı baskısı arttı. Alt galerilerde korku büyüdü, üretim geriliyor.",
+        tag:"bad"
+      }
+    ]
+  },
+  {
+    title: "Bölüm 5 — İnsan Faktörü",
+    text: `
+      <p>Mekanizasyon söylentileri yayılıyor. İşçiler, makinelerin işlerini alacağından korkuyor. Grev ve sabotaj ihtimali masada. Teknik çözüm tek başına yetmiyor.</p>
+      <p><strong>Karar:</strong> Sosyal tansiyonu nasıl yöneteceksiniz?</p>
+    `,
+    choices: [
+      {
+        title: "Ücret + erzak + güvenlik paketi ver",
+        desc: "Maliyet yaratır ama sosyal barışı satın alırsın.",
+        effects: { cash:-280, morale:+24, risk:-16, expenses:+40 },
+        result:"Bira, ekmek, ek istihkak ve güvenlik taahhüdü işçileri rahatlattı. Grev riski belirgin biçimde düştü.",
+        tag:"good"
+      },
+      {
+        title: "Ustabaşılar üzerinden disiplin uygula",
+        desc: "Hızlı ama tepkisel kontrol.",
+        effects: { cash:-40, morale:-10, risk:+12 },
+        result:"Kısa süreli düzen sağlandı fakat güven zedelendi. Sabotaj fısıltıları büyüdü.",
+        tag:"bad"
+      },
+      {
+        title: "Karma yöntem: sınırlı yardım + açık iletişim",
+        desc: "Orta yol. Ne tam ödün ne tam baskı.",
+        effects: { cash:-120, morale:+10, risk:-6 },
+        result:"İşçiler tamamen ikna olmadı ama tansiyon yumuşadı. Sistem çalışmaya devam ediyor.",
+        tag:"warn"
+      }
+    ]
+  },
+  {
+    title: "Bölüm 6 — Liman ve Sonuç",
+    text: `
+      <p>Maden ve hat verimli hale gelirse bu kez Staiths bölgesi tıkanır. Kıyıda kömür dağları oluşur, yangın ve ceza riski başlar. Son büyük soru: yüklemeyi nasıl bitireceksiniz?</p>
+      <p><strong>Karar:</strong> Son darboğazı nasıl açacaksınız?</p>
+    `,
+    choices: [
+      {
+        title: "Rampa + kontrollü oluk sistemi kur",
+        desc: "Yüksek irtifa, kapalı galeri, deri perdeli yumuşak akış. Mühendislik çözümü.",
+        effects: { cash:-850, logistics:+110, rail:+8, risk:-4, income:+220 },
+        result:"Newcastle rampası kuruldu. Gemi yükleme hızı sıçradı, kıyı yığılması çözüldü, sistem uçtan uca akmaya başladı.",
+        tag:"good"
+      },
+      {
+        title: "Elle yüklemeyi artır, daha fazla işçi kullan",
+        desc: "Düşük yatırım, düşük verim.",
+        effects: { cash:-180, logistics:+35, morale:-4, expenses:+90, risk:+4 },
+        result:"Ek hamal ve yavaş vinçlerle liman biraz rahatladı ama darboğaz tamamen çözülmedi.",
+        tag:"warn"
+      },
+      {
+        title: "Yükü bilerek sınırlı tut, üretimi kıs",
+        desc: "Sistemi korur ama büyüme fırsatını boğar.",
+        effects: { cash:0, production:-70, logistics:+10, morale:+3, income:-260, risk:-2 },
+        result:"Daha güvenli ama dar bir işletme modeli seçildi. Liman rahatladı fakat sanayi ivmesi kesildi.",
+        tag:"bad"
+      }
+    ]
+  }
+];
+
+function clamp(v,min,max){ return Math.max(min, Math.min(max, v)); }
+
+function monthlyNet() {
+  const shippable = Math.min(state.production, state.logistics);
+  const monthlyRevenue = Math.round((shippable / 180) * state.income);
+  const monthlyExpenses = Math.round(state.expenses);
+  return { shippable, monthlyRevenue, monthlyExpenses, net: monthlyRevenue - monthlyExpenses };
+}
+
+
+function randomOperationalEvent() {
+  const goodEvents = [
+    {
+      test: () => state.risk < 45,
+      apply: () => {
+        state.cash += 110;
+        state.production += 20;
+        return {title:"Verimli Gün", body:"Vardiyalar sorunsuz aktı. Kayıp azaldı, satış kalitesi yükseldi.", tag:"good", status:"Operasyon bonusu"};
+      }
+    },
+    {
+      test: () => state.morale > 55,
+      apply: () => {
+        state.production += 15;
+        state.risk -= 3;
+        return {title:"Usta Disiplini", body:"Tecrübeli ustabaşılar akışı iyi yönetti. Kırılma ve gecikme azaldı.", tag:"good", status:"İnsan avantajı"};
+      }
+    }
+  ];
+
+  const badEvents = [
+    {
+      test: () => true,
+      apply: () => {
+        state.logistics -= 25;
+        state.risk += 6;
+        return {title:"Şiddetli Yağmur", body:"Yollar çamura döndü. Vagon çevrimi yavaşladı.", tag:"warn", status:"Hava olayı"};
+      }
+    },
+    {
+      test: () => state.morale < 60,
+      apply: () => {
+        state.production -= 35;
+        state.morale -= 6;
+        state.risk += 8;
+        return {title:"İşçi Yavaşlatması", body:"Bazı ekipler temposunu düşürdü. Üretim aksadı.", tag:"warn", status:"Sosyal gerilim"};
+      }
+    },
+    {
+      test: () => state.rail < 45,
+      apply: () => {
+        state.logistics -= 30;
+        state.rail -= 4;
+        state.risk += 9;
+        return {title:"Ray Kırılması", body:"Zayıf noktada ray çatladı. Hat kapasitesi düştü.", tag:"bad", status:"Altyapı şoku"};
+      }
+    },
+    {
+      test: () => state.pump < 45,
+      apply: () => {
+        state.production -= 30;
+        state.risk += 7;
+        return {title:"Su Basıncı Artışı", body:"Pompa yetersiz kaldı. Alt galerilerde üretim yavaşladı.", tag:"bad", status:"Maden baskısı"};
+      }
+    }
+  ];
+
+  const roll = Math.random();
+  let pool = [];
+  if (state.risk >= 65) {
+    pool = badEvents.filter(e => e.test());
+  } else if (state.risk <= 30) {
+    pool = goodEvents.filter(e => e.test()).concat(badEvents.filter(e => e.test()).slice(0,1));
+  } else {
+    pool = goodEvents.filter(e => e.test()).concat(badEvents.filter(e => e.test()));
+  }
+
+  if (!pool.length) return null;
+  const shouldTrigger = roll < 0.55;
+  if (!shouldTrigger) return null;
+
+  const evt = pool[Math.floor(Math.random() * pool.length)].apply();
+  state.log.unshift(evt);
+  return evt;
+}
+
+function autoConsequences() {
+  let notes = [];
+
+  randomOperationalEvent();
+
+  if (state.production > state.logistics + 80) {
+    state.risk += 8;
+    notes.push({title:"Darboğaz", body:"Üretim lojistik kapasitesini ciddi biçimde aştı. Kıyıda ve hat üzerinde stok yığılması başladı.", tag:"warn", status:"Liman baskısı"});
+  }
+  if (state.pump < 25) {
+    state.production -= 40;
+    state.risk += 10;
+    notes.push({title:"Su Baskısı", body:"Pompa verimi düşük kaldığı için alt galerilerde su seviyesi yükseldi. Üretim geriledi.", tag:"bad", status:"Maden baskısı"});
+  }
+  if (state.rail < 20) {
+    state.logistics -= 20;
+    state.risk += 8;
+    notes.push({title:"Ray Hasarı", body:"Zayıf altyapı nedeniyle hat kapasitesi düştü. Kırılma ve bakım baskısı arttı.", tag:"bad", status:"Hat kırılması"});
+  }
+  if (state.morale < 35) {
+    state.risk += 10;
+    notes.push({title:"Sosyal Tansiyon", body:"İşçi morali kritik seviyeye indi. Söylenti, grev ve sabotaj riski yükseliyor.", tag:"warn", status:"İnsan faktörü"});
+  }
+  if (state.risk > 65) {
+    state.cash -= 250;
+    state.morale -= 6;
+    notes.push({title:"Kaza / Sabotaj Olayı", body:"Yüksek risk ortamı küçük bir operasyonel krize dönüştü. Onarım ve gecikme maliyeti oluştu.", tag:"bad", status:"Krizin bedeli"});
+  }
+
+  state.cash = clamp(state.cash, -99999, 999999);
+  state.production = clamp(state.production, 60, 900);
+  state.logistics = clamp(state.logistics, 60, 900);
+  state.pump = clamp(state.pump, 0, 100);
+  state.rail = clamp(state.rail, 0, 100);
+  state.morale = clamp(state.morale, 0, 100);
+  state.risk = clamp(state.risk, 0, 100);
+
+  notes.forEach(n => state.log.unshift(n));
+}
+
+function applyChoice(choice) {
+  if (state.ended) return;
+  const e = choice.effects;
+  Object.keys(e).forEach(k => state[k] += e[k]);
+
+  state.log.unshift({title: scenes[state.stage].title, body: choice.result, tag: choice.tag, status: choice.title});
+  autoConsequences();
+  state.stage += 1;
+  checkEnding();
+  render();
+}
+
+function checkEnding() {
+  const m = monthlyNet();
+
+  if (state.cash < 1000) {
+    state.ended = true;
+    state.endingText = `<div class="ending bad"><strong>Sonuç: Nakit darbesi.</strong><br>Operasyon tamamen batmadı ama sermaye esnekliğini kaybetti. Artık her yeni şok ölümcül olabilir.</div>`;
+    return;
+  }
+  if (state.risk >= 90) {
+    state.ended = true;
+    state.endingText = `<div class="ending bad"><strong>Sonuç: Kontrol kaybı.</strong><br>Risk birikimi kazaya, üretim aksamasına ve güven kaybına dönüştü. Sistem yönetilemez hale geldi.</div>`;
+    return;
+  }
+  if (state.stage >= scenes.length) {
+    state.ended = true;
+    let rating = "warn";
+    let title = "Kısmi Başarı";
+    let text = "Sistemi ayakta tuttun ama tam sanayi sıçraması yaratamadın.";
+
+    if (m.net > 900 && state.logistics >= 300 && state.pump >= 55 && state.morale >= 50 && state.risk < 50) {
+      rating = "good";
+      title = "Endüstriyel Zafer";
+      text = "Maden, hat, pompa ve limanı birbirine bağlayan gerçek bir sanayi makinesi kurdun. Farklı bir oyuncu başka yol seçebilirdi; seninki sürdürülebilir ve güçlü bir çözüm oldu.";
+    } else if (m.net < 0 || state.morale < 30) {
+      rating = "bad";
+      title = "Kırılgan Denge";
+      text = "Bazı darboğazları çözdün ama sistem bütün olarak sağlama oturmadı. Kâr, sosyal istikrar veya teknik dayanıklılık eksik kaldı.";
+    }
+
+    state.endingText = `<div class="ending ${rating}"><strong>Sonuç: ${title}</strong><br>${text}<br><br><span class="mono">Aylık Net: £${m.net} | Sevk Edilen: ${m.shippable} ton | Risk: ${state.risk} | Moral: ${state.morale}</span></div>`;
+  }
+}
+
+function renderBars() {
+  const maxTonnage = 600;
+  document.getElementById('productionBar').style.width = clamp((state.production/maxTonnage)*100,0,100) + '%';
+  document.getElementById('logisticsBar').style.width = clamp((state.logistics/maxTonnage)*100,0,100) + '%';
+  document.getElementById('pumpBar').style.width = state.pump + '%';
+  document.getElementById('railBar').style.width = state.rail + '%';
+  document.getElementById('moraleBar').style.width = state.morale + '%';
+  document.getElementById('riskBar').style.width = state.risk + '%';
+  document.getElementById('riskBar').style.background = state.risk >= 70 ? '#ff8a8a' : state.risk >= 45 ? '#ffd37a' : '#d8e8ff';
+}
+
+function renderLog() {
+  const box = document.getElementById('logBox');
+  box.innerHTML = state.log.map(item => `
+    <div class="logEntry">
+      <h4>${item.title}<span class="tag ${item.tag}">${item.status}</span></h4>
+      <div class="muted">${item.body}</div>
+    </div>
+  `).join('');
+}
+
+function renderSummary() {
+  const m = monthlyNet();
+  let tone = "Sistem kırılgan ama hareket halinde.";
+  if (m.net > 0 && state.risk < 50) tone = "Sistem kâra dönüyor ve kontrol edilebilir görünüyor.";
+  if (state.production > state.logistics) tone = "Üretim lojistiği aşıyor; yeni darboğazlar doğuyor.";
+  if (state.morale < 35) tone = "İnsan faktörü yeniden öncelik haline gelmiş durumda.";
+
+  document.getElementById('summaryBox').innerHTML = `
+    <p><strong>Aylık gelir:</strong> £${m.monthlyRevenue}</p>
+    <p><strong>Aylık gider:</strong> £${m.monthlyExpenses}</p>
+    <p><strong>Aylık net:</strong> £${m.net}</p>
+    <p><strong>Nehre ulaşan satışa hazır kömür:</strong> ${m.shippable} ton/gün</p>
+    <p><strong>Yorum:</strong> ${tone}</p>
+  `;
+}
+
+function renderScene() {
+  const title = document.getElementById('sceneTitle');
+  const text = document.getElementById('sceneText');
+  const box = document.getElementById('choicesBox');
+
+  if (state.ended) {
+    title.textContent = "Final Raporu";
+    text.innerHTML = state.endingText;
+    box.innerHTML = `<button onclick="restartGame()">Tekrar Oyna</button>`;
+    return;
+  }
+
+  const scene = scenes[state.stage];
+  title.textContent = scene.title;
+  text.innerHTML = scene.text;
+  box.innerHTML = scene.choices.map((c, i) => `
+    <div class="choice">
+      <h4>${String.fromCharCode(65+i)}) ${c.title}</h4>
+      <p>${c.desc}</p>
+      <div class="effects">Tahmini etki: ${effectText(c.effects)}</div>
+      <div style="margin-top:10px;"><button onclick="applyChoiceByIndex(${i})">Bu yolu seç</button></div>
+    </div>
+  `).join('');
+}
+
+function effectText(e) {
+  const labels = {
+    cash:'Nakit', production:'Üretim', logistics:'Lojistik', pump:'Pompa', rail:'Ray', morale:'Moral', risk:'Risk', expenses:'Gider', income:'Gelir'
+  };
+  return Object.keys(e).map(k => `${labels[k]} ${e[k] > 0 ? '+' : ''}${e[k]}`).join(' | ');
+}
+
+function applyChoiceByIndex(i) {
+  applyChoice(scenes[state.stage].choices[i]);
+}
+
+function render() {
+  document.getElementById('monthLabel').textContent = monthNames[Math.min(state.stage, monthNames.length-1)];
+  document.getElementById('stageLabel').textContent = `${Math.min(state.stage+1, scenes.length)} / ${scenes.length}`;
+  document.getElementById('cashVal').textContent = Math.round(state.cash);
+  document.getElementById('productionVal').textContent = Math.round(state.production);
+  document.getElementById('logisticsVal').textContent = Math.round(state.logistics);
+  document.getElementById('pumpVal').textContent = Math.round(state.pump);
+  document.getElementById('railVal').textContent = Math.round(state.rail);
+  document.getElementById('moraleVal').textContent = Math.round(state.morale);
+  document.getElementById('riskVal').textContent = Math.round(state.risk);
+  renderBars();
+  renderLog();
+  renderSummary();
+  renderScene();
+}
+
+function restartGame() {
+  state = initialState();
+  render();
+}
+
+function showHelp() {
+  alert("Nasıl oynanır:\n\n1) Hikâyeyi oku.\n2) Her bölümde bir yol seç.\n3) Seçimin rakamları değiştirir.\n4) Oyun otomatik sonuç üretir.\n\nBu oyun tek doğru hikâye değil, tarihsel koşullar sabitken farklı karar yollarını denemek için kuruldu.");
+}
+
+
+function fillExample() {
+  const examples = [
+    "Önce Watt pompalarını sipariş ederim, sonra ray altyapısını güçlendiririm ve işçilere ek erzak veririm.",
+    "Büyük yatırım yapmadan önce atlı lojistiği artırır, liman yüklemesini geçici olarak elle büyütürüm.",
+    "Lokomotifi hemen ana hatta sokmam; izole deneme hattı kurar, riskleri azaltırım."
+  ];
+  document.getElementById('aiInput').value = examples[Math.floor(Math.random() * examples.length)];
+}
+
+async function processAI() {
+  if (state.ended) return;
+
+  const inputEl = document.getElementById('aiInput');
+  const raw = inputEl.value.trim();
+  if (!raw) {
+    alert("Önce bir karar yaz.");
+    return;
+  }
+
+  state.log.unshift({
+    title:"AI Analizi Başladı",
+    body:"Kararın OpenAI ile analiz ediliyor...",
+    tag:"warn",
+    status:"Bekleniyor"
+  });
+  render();
+
+  try {
+    const resp = await fetch('/api/decision', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        decision: raw,
+        state: {
+          stage: state.stage,
+          cash: state.cash,
+          production: state.production,
+          logistics: state.logistics,
+          pump: state.pump,
+          rail: state.rail,
+          morale: state.morale,
+          risk: state.risk,
+          income: state.income,
+          expenses: state.expenses
+        }
+      })
+    });
+
+    const data = await resp.json();
+    state.log = state.log.filter(item => item.status !== "Bekleniyor");
+
+    if (!resp.ok || !data.ok) {
+      state.log.unshift({
+        title:"AI Kararı İşlenemedi",
+        body:data.error || "Sunucu yanıt veremedi.",
+        tag:"bad",
+        status:"Hata"
+      });
+      render();
+      return;
+    }
+
+    if (data.rejected) {
+      state.log.unshift({
+        title:"Dönem Dışı Karar Reddedildi",
+        body:data.narrative || "Karar 1814 sınırlarına uymuyor.",
+        tag:"bad",
+        status:"Teknoloji kilidi"
+      });
+      state.risk += 2;
+      checkEnding();
+      render();
+      return;
+    }
+
+    const effects = data.effects || {};
+    Object.keys(effects).forEach(k => {
+      if (typeof state[k] === 'number' && typeof effects[k] === 'number') {
+        state[k] += effects[k];
+      }
+    });
+
+    state.log.unshift({
+      title:"Serbest Karar Uygulandı",
+      body:data.narrative || "Karar AI tarafından yorumlandı ve uygulandı.",
+      tag:data.tag || "good",
+      status:"OpenAI yorumu"
+    });
+
+    if (Array.isArray(data.secondary_events)) {
+      data.secondary_events.slice(0,2).forEach(ev => {
+        state.log.unshift({
+          title: ev.title || "İkincil Etki",
+          body: ev.body || "Ek operasyonel etki oluştu.",
+          tag: ev.tag || "warn",
+          status: ev.status || "Yan etki"
+        });
+      });
+    }
+
+    autoConsequences();
+    checkEnding();
+    render();
+    inputEl.value = "";
+  } catch (err) {
+    state.log = state.log.filter(item => item.status !== "Bekleniyor");
+    state.log.unshift({
+      title:"AI Sunucu Hatası",
+      body:"OpenAI bağlantısında sorun oluştu. API anahtarı ve sunucu ayarını kontrol et.",
+      tag:"bad",
+      status:"Bağlantı"
+    });
+    render();
+  }
+}
+
+render();
+render();
+</script>
+</body>
+</html>
