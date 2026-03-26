@@ -177,3 +177,19 @@ app.get("*", (_req, res) => {
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
+function renderFlow(){
+
+  const prod = state.production;
+  const log = state.logistics;
+
+  const ratio = log / prod;
+
+  document.getElementById("prodBar").style.width = "100%";
+  document.getElementById("flowBar").style.width = (ratio*100)+"%";
+
+  const loss = prod - log;
+
+  document.getElementById("lossText").innerHTML =
+    `Kayıp: ${loss} ton (${Math.round((1-ratio)*100)}%)`;
+
+}
