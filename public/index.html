@@ -1,573 +1,215 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Industrial Operator 1814</title>
-  <style>
-    :root{
-      --bg:#07111f;
-      --panel:#12233d;
-      --panel2:#182d4d;
-      --line:#2c456d;
-      --text:#eef4ff;
-      --muted:#bfd0ee;
-      --good:#8ef0a7;
-      --warn:#ffd37a;
-      --bad:#ff8a8a;
-    }
+<meta charset="UTF-8">
+<title>Industrial Operator 1814</title>
 
-    *{box-sizing:border-box}
+<style>
+body{
+  margin:0;
+  background:#07111f;
+  color:#eef4ff;
+  font-family:Arial;
+}
 
-    body{
-      margin:0;
-      background:linear-gradient(180deg,#07111f 0%,#0c1b31 100%);
-      color:var(--text);
-      font-family:Arial, Helvetica, sans-serif;
-    }
+.wrap{
+  max-width:1100px;
+  margin:auto;
+  padding:20px;
+}
 
-    .wrap{
-      max-width:1100px;
-      margin:0 auto;
-      padding:20px;
-    }
+.header{
+  background:#12233d;
+  padding:20px;
+  border-radius:12px;
+  margin-bottom:15px;
+}
 
-    .hero,.panel{
-      background:rgba(18,35,61,.96);
-      border:1px solid var(--line);
-      border-radius:18px;
-      box-shadow:0 14px 40px rgba(0,0,0,.25);
-    }
+.grid{
+  display:grid;
+  grid-template-columns:2fr 1fr;
+  gap:15px;
+}
 
-    .hero{
-      padding:22px;
-      margin-bottom:16px;
-    }
+.panel{
+  background:#12233d;
+  padding:15px;
+  border-radius:12px;
+}
 
-    .hero h1{
-      margin:0 0 8px;
-      font-size:34px;
-    }
+.flow{
+  display:flex;
+  justify-content:space-between;
+  margin-top:15px;
+}
 
-    .hero p{
-      margin:8px 0;
-      color:var(--muted);
-      line-height:1.55;
-    }
+.node{
+  background:#0b1730;
+  padding:10px;
+  border-radius:8px;
+  text-align:center;
+  flex:1;
+  margin:5px;
+}
 
-    .grid{
-      display:grid;
-      grid-template-columns:1.15fr .85fr;
-      gap:16px;
-    }
+.bar{
+  height:8px;
+  background:#2c456d;
+  margin-top:5px;
+}
 
-    .panel{
-      padding:18px;
-    }
+.fill{
+  height:100%;
+  background:#8ef0a7;
+}
 
-    .panel h2,.panel h3{
-      margin-top:0;
-    }
+textarea{
+  width:100%;
+  padding:10px;
+  background:#0b1730;
+  color:white;
+  border:1px solid #2c456d;
+}
 
-    .stats{
-      display:grid;
-      grid-template-columns:repeat(3,1fr);
-      gap:10px;
-      margin-top:14px;
-    }
+button{
+  margin-top:10px;
+  padding:10px;
+  cursor:pointer;
+}
 
-    .stat{
-      background:var(--panel2);
-      border:1px solid var(--line);
-      padding:12px;
-      border-radius:14px;
-    }
+.report{
+  background:#0f1d34;
+  padding:10px;
+  margin-top:10px;
+}
 
-    .stat .label{
-      font-size:13px;
-      color:var(--muted);
-    }
-
-    .stat .value{
-      font-size:26px;
-      font-weight:bold;
-      margin-top:6px;
-    }
-
-    .smallGrid{
-      display:grid;
-      grid-template-columns:repeat(2,1fr);
-      gap:10px;
-      margin-top:10px;
-    }
-
-    .barWrap{
-      margin-top:8px;
-      height:10px;
-      background:#0b1730;
-      border-radius:999px;
-      overflow:hidden;
-      border:1px solid var(--line);
-    }
-
-    .bar{
-      height:100%;
-      background:#d8e8ff;
-      width:50%;
-      transition:width .25s ease;
-    }
-
-    .story{
-      line-height:1.7;
-      color:var(--text);
-      font-size:16px;
-    }
-
-    .muted{
-      color:var(--muted);
-    }
-
-    button, textarea{
-      border-radius:12px;
-      font-size:15px;
-    }
-
-    button{
-      appearance:none;
-      border:none;
-      padding:11px 14px;
-      background:#eef4ff;
-      color:#07111f;
-      font-weight:bold;
-      cursor:pointer;
-    }
-
-    button:hover{
-      opacity:.93;
-    }
-
-    .secondary{
-      background:#213a61;
-      color:var(--text);
-      border:1px solid var(--line);
-    }
-
-    .log{
-      max-height:560px;
-      overflow:auto;
-      padding-right:4px;
-    }
-
-    .logEntry{
-      background:var(--panel2);
-      border:1px solid var(--line);
-      border-radius:14px;
-      padding:12px;
-      margin-bottom:10px;
-    }
-
-    .logEntry h4{
-      margin:0 0 6px;
-      font-size:16px;
-    }
-
-    .tag{
-      display:inline-block;
-      padding:4px 8px;
-      border-radius:999px;
-      font-size:12px;
-      font-weight:bold;
-      margin-left:8px;
-    }
-
-    .tag.good{
-      background:rgba(142,240,167,.12);
-      color:var(--good);
-    }
-
-    .tag.warn{
-      background:rgba(255,211,122,.12);
-      color:var(--warn);
-    }
-
-    .tag.bad{
-      background:rgba(255,138,138,.12);
-      color:var(--bad);
-    }
-
-    .topActions{
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-      margin-top:14px;
-    }
-
-    .footerNote{
-      margin-top:10px;
-      font-size:13px;
-      color:var(--muted);
-      line-height:1.5;
-    }
-
-    textarea{
-      width:100%;
-      min-height:92px;
-      background:#0b1730;
-      color:#fff;
-      border:1px solid var(--line);
-      padding:12px;
-      resize:vertical;
-    }
-
-    .sending{
-      opacity:.7;
-      pointer-events:none;
-    }
-
-    .reportBox{
-      margin-top:14px;
-      background:#0f1d34;
-      border:1px solid var(--line);
-      border-radius:14px;
-      padding:12px;
-      line-height:1.7;
-    }
-
-    .reportTitle{
-      font-weight:bold;
-      margin-bottom:8px;
-      color:#fff;
-    }
-
-    @media (max-width: 920px){
-      .grid{grid-template-columns:1fr}
-      .stats{grid-template-columns:1fr 1fr}
-    }
-
-    @media (max-width: 640px){
-      .stats,.smallGrid{grid-template-columns:1fr}
-      .hero h1{font-size:28px}
-    }
-  </style>
+.log{
+  max-height:300px;
+  overflow:auto;
+}
+</style>
 </head>
+
 <body>
+
 <div class="wrap">
-  <div class="hero">
-    <h1>Industrial Operator: 1814</h1>
-    <p><strong>Newcastle upon Tyne, 25 Temmuz 1814.</strong> Napolyon Savaşları'nın sonuna yaklaşılırken Britanya sanayisi kömüre aç. Sen, <strong>Grand Allies</strong> maden konsorsiyumunun tam yetkili operasyonel direktörü ve baş yatırımcısısın.</p>
-    <p>Madenler günde 500 ton kömür çıkarıyor ama nehre ulaşan miktar sadece 180 ton. Atlı lojistik çökmüş durumda, Newcomen pompaları kömürün büyük kısmını kendi içinde yakıyor, işçiler huzursuz, raylar kırılgan, liman darboğazlı.</p>
-    <p>Aylık mali tablo başlangıçta zararda: <strong>Gelir 2.160 £</strong>, <strong>Gider 2.320 £</strong>, <strong>Net -160 £</strong>.</p>
-    <div class="topActions">
-      <button onclick="restartGame()">Oyunu Baştan Başlat</button>
-      <button class="secondary" onclick="showHelp()">Nasıl Oynanır?</button>
-    </div>
-  </div>
 
-  <div class="grid">
-    <div>
-      <div class="panel">
-        <h2>Durum Paneli</h2>
-        <div class="stats">
-          <div class="stat">
-            <div class="label">Ay</div>
-            <div class="value" id="monthLabel">Temmuz 1814</div>
-          </div>
-          <div class="stat">
-            <div class="label">Aşama</div>
-            <div class="value" id="stageLabel">1 / 6</div>
-          </div>
-          <div class="stat">
-            <div class="label">Nakit</div>
-            <div class="value"><span id="cashVal">15.000</span> £</div>
-          </div>
-        </div>
+<div class="header">
+<h2>1814 Newcastle Krizi</h2>
+<p>500 ton üretim var ama sadece 180 ton limana ulaşıyor.</p>
+</div>
 
-        <div class="smallGrid">
-          <div class="stat">
-            <div class="label">Üretim</div>
-            <div class="value"><span id="productionVal">500</span> ton</div>
-            <div class="barWrap"><div class="bar" id="productionBar"></div></div>
-          </div>
+<div class="grid">
 
-          <div class="stat">
-            <div class="label">Lojistik Kapasitesi</div>
-            <div class="value"><span id="logisticsVal">180</span> ton</div>
-            <div class="barWrap"><div class="bar" id="logisticsBar"></div></div>
-          </div>
+<div>
 
-          <div class="stat">
-            <div class="label">Pompa Verimi</div>
-            <div class="value"><span id="pumpVal">20</span>/100</div>
-            <div class="barWrap"><div class="bar" id="pumpBar"></div></div>
-          </div>
+<div class="panel">
+<h3>Sistem Akışı</h3>
 
-          <div class="stat">
-            <div class="label">Ray / Altyapı</div>
-            <div class="value"><span id="railVal">25</span>/100</div>
-            <div class="barWrap"><div class="bar" id="railBar"></div></div>
-          </div>
+<div class="flow">
+<div class="node">Maden<br><span id="prod">500</span></div>
+<div class="node">Ray Hattı<br><span id="log">180</span></div>
+<div class="node">Liman</div>
+</div>
 
-          <div class="stat">
-            <div class="label">İşçi Morali</div>
-            <div class="value"><span id="moraleVal">48</span>/100</div>
-            <div class="barWrap"><div class="bar" id="moraleBar"></div></div>
-          </div>
+</div>
 
-          <div class="stat">
-            <div class="label">Risk</div>
-            <div class="value"><span id="riskVal">28</span>/100</div>
-            <div class="barWrap"><div class="bar" id="riskBar"></div></div>
-          </div>
-        </div>
-      </div>
+<div class="panel">
+<h3>Karar</h3>
 
-      <div class="panel" style="margin-top:16px;">
-        <h2>Serbest Karar</h2>
-        <div class="story">İstediğin kararı kendin yaz. Sistem 1814 koşullarına göre etkisini yorumlasın.</div>
+<textarea id="input"></textarea>
+<button onclick="send()">Uygula</button>
 
-        <div style="margin-top:12px;">
-          <textarea id="aiInput" placeholder="Örn: Ray altyapısını güçlendirip lojistiği iyileştiriyorum."></textarea>
-          <div class="topActions" style="margin-top:12px;">
-            <button id="sendBtn" onclick="processAI()">Serbest kararı uygula</button>
-            <button class="secondary" onclick="fillExample()">Örnek karar doldur</button>
-          </div>
-        </div>
+<div id="report" class="report">Henüz karar yok</div>
 
-        <div class="reportBox" id="lastReportBox">
-          <div class="reportTitle">Sonuç Raporu</div>
-          <div class="muted">Henüz yeni bir karar uygulanmadı.</div>
-        </div>
+</div>
 
-        <div class="footerNote">Not: Oyun dönem dışı kararları kabul etmez.</div>
-      </div>
-    </div>
+</div>
 
-    <div>
-      <div class="panel">
-        <h2>Operasyon Günlüğü</h2>
-        <div class="log" id="logBox"></div>
-      </div>
+<div>
 
-      <div class="panel" style="margin-top:16px;">
-        <h2>Durum Özeti</h2>
-        <div id="summaryBox" class="story muted"></div>
-      </div>
-    </div>
-  </div>
+<div class="panel">
+<h3>Durum</h3>
+
+Nakit: £<span id="cash">15000</span><br>
+Moral: <span id="mor">48</span><br>
+Risk: <span id="risk">28</span>
+
+</div>
+
+<div class="panel">
+<h3>Geçmiş</h3>
+<div id="log" class="log"></div>
+</div>
+
+</div>
+
+</div>
+
 </div>
 
 <script>
-window.onerror = function(message, source, lineno) {
-  document.body.innerHTML = "<pre style='color:white;padding:20px'>" + message + "\\n" + source + ":" + lineno + "</pre>";
+
+let state = {
+  production:500,
+  logistics:180,
+  morale:48,
+  risk:28,
+  cash:15000
 };
 
-const initialState = () => ({
-  stage: 0,
-  cash: 15000,
-  production: 500,
-  logistics: 180,
-  pump: 20,
-  rail: 25,
-  morale: 48,
-  risk: 28,
-  income: 2160,
-  expenses: 2320,
-  log: [
-    {
-      title: "Başlangıç Raporu",
-      body: "Sistem zararda. Günde 500 ton kömür çıkarılıyor ama nehre sadece 180 ton ulaşıyor. Atlı lojistik yetersiz, pompalar verimsiz, işçiler huzursuz.",
-      tag: "warn",
-      status: "Krize giriş"
-    }
-  ]
-});
-
-let state = initialState();
-
-function clamp(v,min,max){
-  return Math.max(min, Math.min(max, v));
+function format(n){
+  return n.toLocaleString("tr-TR");
 }
 
-function formatMoney(n) {
-  return Math.round(n).toLocaleString("tr-TR");
+function render(){
+  prod.textContent = state.production;
+  log.textContent = state.logistics;
+  mor.textContent = state.morale;
+  risk.textContent = state.risk;
+  cash.textContent = format(state.cash);
 }
 
-function renderBars() {
-  const maxTonnage = 600;
-  document.getElementById("productionBar").style.width = clamp((state.production / maxTonnage) * 100, 0, 100) + "%";
-  document.getElementById("logisticsBar").style.width = clamp((state.logistics / maxTonnage) * 100, 0, 100) + "%";
-  document.getElementById("pumpBar").style.width = state.pump + "%";
-  document.getElementById("railBar").style.width = state.rail + "%";
-  document.getElementById("moraleBar").style.width = state.morale + "%";
-  document.getElementById("riskBar").style.width = state.risk + "%";
-  document.getElementById("riskBar").style.background = state.risk >= 70 ? "#ff8a8a" : state.risk >= 45 ? "#ffd37a" : "#d8e8ff";
-}
+async function send(){
 
-function renderLog() {
-  const box = document.getElementById("logBox");
-  box.innerHTML = state.log.map(item => `
-    <div class="logEntry">
-      <h4>${item.title}<span class="tag ${item.tag}">${item.status}</span></h4>
-      <div class="muted">${item.body}</div>
-    </div>
-  `).join("");
-}
+  const val = input.value;
 
-function renderSummary() {
-  const shippable = Math.min(state.production, state.logistics);
-  const monthlyRevenue = Math.round((shippable / 180) * state.income);
-  const monthlyExpenses = Math.round(state.expenses);
-  const net = monthlyRevenue - monthlyExpenses;
+  const res = await fetch("/api",{
+    method:"POST",
+    headers:{ "Content-Type":"application/json"},
+    body: JSON.stringify({ input:val })
+  });
 
-  document.getElementById("summaryBox").innerHTML = `
-    <p><strong>Aylık gelir:</strong> ${formatMoney(monthlyRevenue)} £</p>
-    <p><strong>Aylık gider:</strong> ${formatMoney(monthlyExpenses)} £</p>
-    <p><strong>Aylık net:</strong> ${formatMoney(net)} £</p>
-    <p><strong>Nehre ulaşan satışa hazır kömür:</strong> ${shippable} ton/gün</p>
-  `;
-}
+  const data = await res.json();
 
-function render() {
-  document.getElementById("monthLabel").textContent = "Temmuz 1814";
-  document.getElementById("stageLabel").textContent = "1 / 6";
-  document.getElementById("cashVal").textContent = formatMoney(state.cash);
-  document.getElementById("productionVal").textContent = Math.round(state.production);
-  document.getElementById("logisticsVal").textContent = Math.round(state.logistics);
-  document.getElementById("pumpVal").textContent = Math.round(state.pump);
-  document.getElementById("railVal").textContent = Math.round(state.rail);
-  document.getElementById("moraleVal").textContent = Math.round(state.morale);
-  document.getElementById("riskVal").textContent = Math.round(state.risk);
-  renderBars();
-  renderLog();
-  renderSummary();
-}
+  if(data.result){
 
-function restartGame() {
-  state = initialState();
-  document.getElementById("lastReportBox").innerHTML = `
-    <div class="reportTitle">Sonuç Raporu</div>
-    <div class="muted">Henüz yeni bir karar uygulanmadı.</div>
-  `;
-  render();
-}
+    const before = {...state};
 
-function showHelp() {
-  alert("Kararını yaz. Sonra 'Serbest kararı uygula' butonuna bas. Enter da gönderir. Her karar sonrası sonuç raporu oluşur.");
-}
+    state.production += data.result.production||0;
+    state.logistics += data.result.logistics||0;
+    state.morale += data.result.morale||0;
+    state.risk += data.result.risk||0;
+    state.cash += data.result.cash||0;
 
-function fillExample() {
-  document.getElementById("aiInput").value = "Ray altyapısını güçlendirip lojistiği iyileştiriyorum.";
-}
-
-async function processAI() {
-  const inputEl = document.getElementById("aiInput");
-  const sendBtn = document.getElementById("sendBtn");
-  const raw = inputEl.value.trim();
-
-  if (!raw) {
-    alert("Önce bir karar yaz.");
-    return;
-  }
-
-  const before = {
-    production: state.production,
-    logistics: state.logistics,
-    morale: state.morale,
-    risk: state.risk
-  };
-
-  sendBtn.classList.add("sending");
-  sendBtn.textContent = "Gönderiliyor...";
-
-  try {
-    const resp = await fetch("/ai-decision", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        decision: raw,
-        state: {
-          stage: state.stage,
-          cash: state.cash,
-          production: state.production,
-          logistics: state.logistics,
-          pump: state.pump,
-          rail: state.rail,
-          morale: state.morale,
-          risk: state.risk,
-          expenses: state.expenses,
-          income: state.income
-        }
-      })
-    });
-
-    const data = await resp.json();
-
-    if (!resp.ok || !data.ok) {
-      state.log.unshift({
-        title: "AI Kararı İşlenemedi",
-        body: data.error || "Sunucu yanıt veremedi.",
-        tag: "bad",
-        status: "Hata"
-      });
-      render();
-      return;
-    }
-
-    const r = data.result || {};
-
-    state.production = clamp(state.production + Number(r.production || 0), 0, 1000);
-    state.logistics = clamp(state.logistics + Number(r.logistics || 0), 0, 1000);
-    state.morale = clamp(state.morale + Number(r.morale || 0), 0, 100);
-    state.risk = clamp(state.risk + Number(r.risk || 0), 0, 100);
-
-    state.log.unshift({
-      title: "Serbest Karar Uygulandı",
-      body: r.summary || "Karar uygulandı.",
-      tag: "good",
-      status: "OpenAI yorumu"
-    });
-
-    document.getElementById("lastReportBox").innerHTML = `
-      <div class="reportTitle">Sonuç Raporu</div>
-      <div class="muted"><strong>Karar:</strong> ${raw}</div>
-      <div class="muted"><strong>Yorum:</strong> ${r.summary || "Karar uygulandı."}</div>
-      <div class="muted"><strong>Üretim:</strong> ${before.production} → ${state.production}</div>
-      <div class="muted"><strong>Lojistik:</strong> ${before.logistics} → ${state.logistics}</div>
-      <div class="muted"><strong>Moral:</strong> ${before.morale} → ${state.morale}</div>
-      <div class="muted"><strong>Risk:</strong> ${before.risk} → ${state.risk}</div>
+    report.innerHTML = `
+    ${data.result.summary}<br><br>
+    Üretim: ${before.production} → ${state.production}<br>
+    Lojistik: ${before.logistics} → ${state.logistics}<br>
+    Nakit: ${format(before.cash)} → ${format(state.cash)}
     `;
 
-    inputEl.value = "";
-    render();
+    log.innerHTML =
+    `<div>${data.result.summary}</div>` + log.innerHTML;
 
-  } catch (err) {
-    console.error(err);
-    state.log.unshift({
-      title: "AI Kararı İşlenemedi",
-      body: "İstek sırasında hata oluştu.",
-      tag: "bad",
-      status: "Hata"
-    });
     render();
-  } finally {
-    sendBtn.classList.remove("sending");
-    sendBtn.textContent = "Serbest kararı uygula";
   }
+
 }
 
-document.addEventListener("DOMContentLoaded", () => {
-  const box = document.getElementById("aiInput");
-  box.addEventListener("keydown", function(e) {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
-      processAI();
-    }
-  });
-});
-
 render();
+
 </script>
+
 </body>
 </html>
