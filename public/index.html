@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Historical Operator Engine v3</title>
+  <style>
+    :root{
+      --bg:#04101f;
+      --panel:#0e2340;
+      --panel2:#122b4b;
+      --line:#274772;
+      --text:#edf5ff;
+      --muted:#bfd1ee;
+      --good:#8ef0a7;
+      --warn:#ffd37a;
+      --bad:#ff8a8a;
+      --shadow:0 16px 40px rgba(0,0,0,.28);
+    }
+    *{box-sizing:border-box}
+    html,body{margin:0;padding:0;background:linear-gradient(180deg,#04101f 0%,#07172b 100%);color:var(--text);font-family:Arial,Helvetica,sans-serif;height:100%}
+    body{min-height:100dvh}
+    .app{max-width:1120px;margin:0 auto;padding:12px;display:grid;gap:12px}
+    .shell{display:grid;gap:12px}
+    .panel{background:rgba(14,35,64,.96);border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow)}
+    .panelInner{padding:14px}
+    .heroTop{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+    h1,h2,h3,p{margin:0}
+    .title{font-size:28px;font-weight:800;margin-bottom:6px}
+    .meta{font-size:13px;color:var(--muted)}
+    .goal{margin-top:10px;padding:12px;border-radius:14px;background:#0a1b33;border:1px solid var(--line);line-height:1.55;color:var(--muted)}
+    select,button,textarea{font:inherit;border-radius:12px}
+    select{background:#102746;color:#fff;border:1px solid var(--line);padding:10px 12px;min-width:210px}
+    button{border:none;padding:12px 14px;font-weight:700;cursor:pointer}
+    .primary{background:#eef4ff;color:#08111d}
+    .secondary{background:#17345c;color:#fff;border:1px solid var(--line)}
+    .danger{background:#2e1b23;color:#ffd4d4;border:1px solid #5a313f}
+    .grid{display:grid;gap:12px}
+    .stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+    .card{background:#173459;border:1px solid #315b91;border-radius:14px;padding:12px}
+    .label{font-size:12px;color:var(--muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:.04em}
+    .value{font-size:18px;font-weight:800}
+    .bigTitle{font-size:12px;color:#d9e8ff;text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px}
+    .bottleneckTitle{font-size:32px;font-weight:800;line-height:1.1;margin-bottom:8px}
+    .bottleneckSub{color:var(--muted);line-height:1.5;margin-bottom:8px}
+    .kv{display:grid;grid-template-columns:1fr;gap:10px}
+    .kvRow{display:grid;grid-template-columns:120px 1fr;gap:10px;padding:8px 0;border-top:1px solid rgba(255,255,255,.06)}
+    .kvRow:first-child{border-top:none}
+    .kvKey{color:#d5e6ff}
+    .kvVal{font-weight:700}
+    textarea{width:100%;min-height:92px;background:#08192f;color:#fff;border:1px solid var(--line);padding:12px;resize:vertical}
+    .actionRow{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
+    .saveHint{font-size:12px;color:var(--muted);margin-top:8px}
+    .miniGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-bottom:12px}
+    .miniCard{background:#173459;border:1px solid #315b91;border-radius:12px;padding:12px}
+    .miniCard span{display:block;font-size:12px;color:var(--muted);margin-bottom:6px}
+    .miniCard strong{font-size:22px}
+    .kvBlock{background:#102646;border:1px solid var(--line);border-radius:12px;padding:12px;display:grid;gap:8px;margin-bottom:12px;line-height:1.5}
+    .sectionTitle{font-size:12px;color:#d9e8ff;text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px}
+    .sectionSubTitle{font-size:14px;font-weight:800;margin-bottom:10px}
+    .aiBox{background:#0a1b33;border:1px solid var(--line);border-radius:12px;padding:12px;line-height:1.6}
+    .historyItem{background:#173459;border:1px solid #315b91;border-radius:12px;padding:8px 12px;margin-bottom:10px}
+    .historyItem summary{cursor:pointer;font-weight:800}
+    .historyBody{margin-top:8px;color:var(--muted);display:grid;gap:6px;line-height:1.5}
+    .logList{display:grid;gap:10px;max-height:280px;overflow:auto}
+    .logEntry{background:#173459;border:1px solid #315b91;border-radius:12px;padding:12px}
+    .logTop{display:flex;justify-content:space-between;gap:10px;align-items:center;margin-bottom:8px}
+    .logBody{color:var(--muted);line-height:1.5}
+    .chip{display:inline-flex;align-items:center;padding:4px 8px;border-radius:999px;font-size:12px;font-weight:700}
+    .chip.good{background:rgba(142,240,167,.12);color:var(--good)}
+    .chip.warn{background:rgba(255,211,122,.12);color:var(--warn)}
+    .chip.bad{background:rgba(255,138,138,.12);color:var(--bad)}
+    .emptyBox{padding:14px;border-radius:12px;background:#102646;border:1px solid var(--line);color:var(--muted)}
+    .twoCol{display:grid;gap:12px}
+    .introModal{position:fixed;inset:0;background:rgba(0,0,0,.55);display:flex;align-items:flex-end;justify-content:center;padding:12px;z-index:30}
+    .introModal.hidden{display:none}
+    .introCard{width:min(720px,100%);background:#0e2340;border:1px solid var(--line);border-radius:20px;box-shadow:var(--shadow);padding:16px;display:grid;gap:12px}
+    .introCard h2{font-size:24px}
+    .introDate{font-size:13px;color:var(--muted)}
+    .introBody{white-space:pre-line;line-height:1.65;color:#dce9ff;max-height:50dvh;overflow:auto}
+    @media (min-width: 900px){
+      .app{padding:16px}
+      .shell{grid-template-columns:minmax(0,1.6fr) minmax(320px,.9fr)}
+      .stats{grid-template-columns:repeat(4,minmax(0,1fr))}
+      .twoCol{grid-template-columns:1fr}
+      .bottleneckTitle{font-size:40px}
+      .introModal{align-items:center}
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <div class="panel">
+      <div class="panelInner heroTop">
+        <div>
+          <div class="title" id="scenarioTitle"></div>
+          <div class="meta" id="scenarioMeta"></div>
+          <div class="goal"><strong>Hedef:</strong> <span id="goalText"></span><br><br><span id="summaryIntro"></span></div>
+        </div>
+        <select id="scenarioSelect"></select>
+      </div>
+    </div>
+
+    <div class="shell">
+      <div class="grid">
+        <div class="panel"><div class="panelInner">
+          <div class="bigTitle">Durum Paneli</div>
+          <div class="stats">
+            <div class="card"><div class="label">Nakit</div><div class="value" id="cashVal"></div></div>
+            <div class="card"><div class="label">Üretim</div><div class="value" id="productionVal"></div></div>
+            <div class="card"><div class="label">Lojistik</div><div class="value" id="logisticsVal"></div></div>
+            <div class="card"><div class="label">Risk</div><div class="value" id="riskVal"></div></div>
+          </div>
+        </div></div>
+
+        <div class="panel"><div class="panelInner">
+          <div class="bigTitle">Aktif Darboğaz</div>
+          <div class="bottleneckTitle" id="activeBottleneckTitle"></div>
+          <div class="bottleneckSub" id="activeBottleneckReason"></div>
+          <div class="meta" id="activeBottleneckFlow"></div>
+        </div></div>
+
+        <div class="panel"><div class="panelInner">
+          <div class="bigTitle">Sistem Durumu</div>
+          <div class="kv">
+            <div class="kvRow"><div class="kvKey">Son değişim</div><div class="kvVal" id="lastChangeVal"></div></div>
+            <div class="kvRow"><div class="kvKey">Sonraki risk</div><div class="kvVal" id="nextRiskVal"></div></div>
+            <div class="kvRow"><div class="kvKey">Bakım baskısı</div><div class="kvVal" id="maintenanceVal"></div></div>
+          </div>
+        </div></div>
+
+        <div class="panel"><div class="panelInner">
+          <div class="bigTitle">Karar</div>
+          <textarea id="decisionInput" placeholder="Kararını kendi cümlenle yaz. Örn: Pompa bakımını artırıp su baskısını azaltıyorum."></textarea>
+          <div class="actionRow">
+            <button class="primary" id="applyBtn">Kararı uygula</button>
+            <button class="secondary" id="exampleBtn">Örnek karar</button>
+            <button class="secondary" id="resetBtn">Baştan başlat</button>
+          </div>
+          <div class="saveHint" id="saveHint"></div>
+        </div></div>
+
+        <div class="panel"><div class="panelInner" id="resultBox"></div></div>
+      </div>
+
+      <div class="grid twoCol">
+        <div class="panel"><div class="panelInner">
+          <div class="bigTitle">Ekonomi Özeti</div>
+          <div class="kv">
+            <div class="kvRow"><div class="kvKey">Aylık gelir</div><div class="kvVal" id="monthlyIncome"></div></div>
+            <div class="kvRow"><div class="kvKey">Aylık gider</div><div class="kvVal" id="monthlyCost"></div></div>
+            <div class="kvRow"><div class="kvKey">Aylık net</div><div class="kvVal" id="monthlyNet"></div></div>
+            <div class="kvRow"><div class="kvKey">Satışa hazır akış</div><div class="kvVal" id="shippableVal"></div></div>
+          </div>
+        </div></div>
+
+        <div class="panel"><div class="panelInner">
+          <div class="bigTitle">Geçmiş</div>
+          <div id="historyBox"></div>
+        </div></div>
+
+        <div class="panel"><div class="panelInner">
+          <div class="bigTitle">Operasyon Günlüğü</div>
+          <div class="logList" id="logBox"></div>
+        </div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="introModal hidden" id="introModal">
+    <div class="introCard">
+      <h2 id="introModalTitle"></h2>
+      <div class="introDate" id="introModalDate"></div>
+      <div class="introBody" id="introModalBody"></div>
+      <div class="actionRow"><button class="primary" id="introCloseBtn">Simülasyonu başlat</button></div>
+    </div>
+  </div>
+
+  <script type="module" src="/app.js"></script>
+</body>
+</html>
